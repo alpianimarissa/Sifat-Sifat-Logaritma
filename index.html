@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logaritma SMA</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            fredoka: ['Fredoka', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f8fafc',
+              100: '#e0f2fe',
+              primary: '#0ea5e9', /* Sky Blue */
+              secondary: '#1e293b', /* Slate */
+              accent: '#f59e0b', /* Amber */
+              dark: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    
+    .math-font {
+      font-family: 'Cambria', 'Georgia', serif;
+      font-style: italic;
+    }
+    
+    .btn-active-scale:active {
+      transform: scale(0.97);
+    }
+
+    .slide-enter {
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-brand-dark font-sans min-h-screen flex flex-col overflow-x-hidden select-none">
+
+  <header class="bg-white border-b border-slate-200 shadow-xs px-4 py-3 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-sky-100">
+          <i class="fa-solid fa-square-root-variable text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-fredoka text-xl text-brand-primary font-bold leading-tight">Logaritma SMA</h1>
+          <p class="text-xs text-slate-500 font-medium">Matematika Wajib</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <!-- Progress Bar -->
+        <div class="hidden md:flex flex-col items-end">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="progress-text">Slide 1 dari 5</span>
+          <div class="w-36 bg-slate-100 h-1.5 rounded-full mt-1 overflow-hidden">
+            <div id="progress-bar-top" class="bg-brand-primary h-full transition-all duration-300" style="width: 20%;"></div>
+          </div>
+        </div>
+        <!-- Sidebar Menu Button -->
+        <button id="sidebar-btn" class="p-2.5 hover:bg-slate-100 text-slate-600 rounded-xl transition-all btn-active-scale" title="Buka Daftar Isi">
+          <i class="fa-solid fa-bars-staggered"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 z-50 hidden backdrop-blur-xs"></div>
+  <aside id="sidebar-panel" class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <div class="p-5 border-b flex items-center justify-between bg-slate-50">
+      <div>
+        <h3 class="font-fredoka text-lg text-brand-secondary font-bold">Daftar Isi Modul</h3>
+        <p class="text-[11px] text-slate-400">Navigasi Materi (Halaman 1 - 5)</p>
+      </div>
+      <button id="close-sidebar-btn" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-times"></i></button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4 space-y-2" id="sidebar-menu-list">
+      <!-- Injected dynamically -->
+    </div>
+  </aside>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 flex flex-col justify-center">
+    <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 overflow-hidden flex-1 flex flex-col min-h-[540px] md:min-h-[600px] border border-slate-100">
+      
+      <!-- Slide Content Viewport -->
+      <div id="slide-viewport" class="flex-1 p-5 sm:p-8 md:p-10 flex flex-col overflow-y-auto">
+        <div id="slide-content-area" class="flex-1 flex flex-col justify-center slide-enter">
+          <!-- Slide Content dynamically loaded -->
+        </div>
+      </div>
+
+      <div class="bg-slate-50 border-t border-slate-100 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <!-- Shortcut Info -->
+        <div class="hidden sm:flex items-center space-x-2 text-xs text-slate-400 font-medium">
+          <kbd class="px-2 py-0.5 bg-white border rounded text-[10px] font-mono">←</kbd>
+          <kbd class="px-2 py-0.5 bg-white border rounded text-[10px] font-mono">→</kbd>
+          <span>Gunakan tombol panah keyboard</span>
+        </div>
+
+        <!-- Slide Indicators (Dots) -->
+        <div class="flex items-center space-x-1.5 overflow-x-auto max-w-[200px] sm:max-w-xs py-1" id="slide-dots"></div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-3 w-full sm:w-auto justify-between">
+          <button id="prev-slide-btn" class="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-bold text-xs flex items-center space-x-2 transition-all btn-active-scale">
+            <i class="fa-solid fa-chevron-left"></i>
+            <span>Sebelumnya</span>
+          </button>
+          
+          <button id="next-slide-btn" class="px-5 py-2.5 bg-brand-primary hover:bg-sky-500 text-white rounded-xl font-bold text-xs flex items-center space-x-2 transition-all shadow-md shadow-sky-100 btn-active-scale">
+            <span id="next-btn-text">Selanjutnya</span>
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    let currentSlide = 0;
+    let activeLabBasis = 2;
+
+    const slidesData = [
+      // Slide 1: Beranda / Cover (Halaman 1)
+      {
+        id: "cover", 
+        title: "Beranda Utama", 
+        category: "Pengantar SMA", 
+        icon: "fa-solid fa-compass",
+        html: `
+          <div class="text-center max-w-3xl mx-auto py-2 sm:py-4">
+            <span class="inline-flex items-center space-x-2 px-4 py-1.5 bg-sky-50 text-brand-primary rounded-full font-bold text-xs uppercase tracking-wider mb-3">
+              <span class="w-2 h-2 bg-brand-primary rounded-full animate-ping"></span>
+              <span>Matematika Wajib Kelas 10–12 SMA</span>
+            </span>
+            <h1 class="font-fredoka text-3xl sm:text-5xl text-slate-800 font-bold leading-tight mb-3">
+              Modul Pembelajaran Interaktif <br><span class="text-brand-primary">Logaritma SMA</span>
+            </h1>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto text-left mb-6">
+              <div class="p-3.5 bg-slate-50 border rounded-2xl flex items-center space-x-3">
+                <div class="w-9 h-9 bg-sky-100 text-brand-primary rounded-xl flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-link"></i></div>
+                <div><h4 class="font-bold text-slate-800 text-xs">Konsep Invers</h4><p class="text-[10px] text-slate-500">Hubungan a<sup>b</sup> = c ⇔ <sup>a</sup>log c = b.</p></div>
+              </div>
+              <div class="p-3.5 bg-slate-50 border rounded-2xl flex items-center space-x-3">
+                <div class="w-9 h-9 bg-amber-100 text-brand-accent rounded-xl flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-shield-halved"></i></div>
+                <div><h4 class="font-bold text-slate-800 text-xs">Syarat Domain</h4><p class="text-[10px] text-slate-500">Syarat a > 0, a ≠ 1 & c > 0.</p></div>
+              </div>
+              <div class="p-3.5 bg-slate-50 border rounded-2xl flex items-center space-x-3">
+                <div class="w-9 h-9 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-sliders"></i></div>
+                <div><h4 class="font-bold text-slate-800 text-xs">Lab Simulator</h4><p class="text-[10px] text-slate-500">Visualisasi nilai real-time.</p></div>
+              </div>
+            </div>
+
+            <button onclick="nextSlide()" class="px-8 py-3 bg-brand-primary hover:bg-sky-500 text-white font-bold rounded-2xl shadow-lg shadow-sky-100 transition-all btn-active-scale text-sm">
+              Mulai Belajar SMA <i class="fa-solid fa-chevron-right ml-1"></i>
+            </button>
+          </div>
+        `
+      },
+
+      // Slide 2: Konsep Dasar (Halaman 2)
+      {
+        id: "concept-basic", 
+        title: "1. Konsep Dasar & Hubungan Eksponen", 
+        category: "Fondasi Logaritma", 
+        icon: "fa-solid fa-link",
+        html: `
+          <div class="space-y-4">
+            <div>
+              <span class="text-xs font-bold uppercase text-brand-primary bg-sky-50 px-3 py-1 rounded-md">Langkah 1 • Fondasi SMA</span>
+              <h2 class="font-fredoka text-2xl text-slate-800 font-bold mt-1">Logaritma Sebagai Invers Eksponen</h2>
+              <p class="text-xs text-slate-500">Logaritma adalah operasi kebalikan (invers) dari perpangkatan (eksponen).</p>
+            </div>
+
+            <div class="bg-gradient-to-r from-sky-500 to-blue-600 text-white p-6 rounded-2xl shadow-lg text-center space-y-3">
+              <span class="text-[10px] uppercase font-bold tracking-widest text-sky-200">Hubungan Utama:</span>
+              <div class="text-2xl sm:text-4xl font-bold font-mono tracking-wider">
+                a<sup>b</sup> = c  <span class="text-amber-300 mx-2">⇔</span>  <sup>a</sup>log c = b
+              </div>
+              <p class="text-xs text-sky-100">"a dipangkatkan berapa yang hasilnya sama dengan c? Jawabannya adalah b."</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="p-3.5 bg-slate-50 border rounded-xl text-center">
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">Basis (a)</span>
+                <p class="text-xs text-slate-700 mt-1">Bilangan pokok/pangkat utama.</p>
+                <div class="mt-2 text-xs font-mono font-bold text-brand-primary">2<sup>3</sup> = 8 ⇒ <sup>2</sup>log 8 = 3</div>
+              </div>
+              <div class="p-3.5 bg-slate-50 border rounded-xl text-center">
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">Numerus (c)</span>
+                <p class="text-xs text-slate-700 mt-1">Hasil perpangkatan yang dicari.</p>
+                <div class="mt-2 text-xs font-mono font-bold text-brand-primary">3<sup>4</sup> = 81 ⇒ <sup>3</sup>log 81 = 4</div>
+              </div>
+              <div class="p-3.5 bg-slate-50 border rounded-xl text-center">
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">Hasil Logaritma (b)</span>
+                <p class="text-xs text-slate-700 mt-1">Nilai eksponen/pangkatnya.</p>
+                <div class="mt-2 text-xs font-mono font-bold text-brand-primary">10<sup>2</sup> = 100 ⇒ log 100 = 2</div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // Slide 3: Domain & Syarat Keberadaan (Halaman 3)
+      {
+        id: "domain", 
+        title: "2. Domain & Syarat Keberadaan", 
+        category: "Syarat SMA", 
+        icon: "fa-solid fa-shield-halved",
+        html: `
+          <div class="space-y-4">
+            <div>
+              <span class="text-xs font-bold uppercase text-brand-primary bg-sky-50 px-3 py-1 rounded-md">Langkah 2 • Prasyarat Wajib SMA</span>
+              <h2 class="font-fredoka text-2xl text-slate-800 font-bold mt-1">Syarat Keberadaan Logaritma (Domain)</h2>
+              <p class="text-xs text-slate-500">Pada soal SMA, numerus dan basis sering kali berbentuk fungsi f(x) dan g(x).</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Syarat Basis -->
+              <div class="p-5 bg-amber-50/80 border border-amber-200 rounded-2xl space-y-2">
+                <div class="flex items-center space-x-2 text-amber-800 font-bold text-sm">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  <span>Syarat 1: Basis (a)</span>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-amber-200 text-xs font-mono font-bold text-amber-900">
+                  a > 0  dan  a ≠ 1
+                </div>
+                <p class="text-[11px] text-slate-600 leading-relaxed">
+                  • Basis harus positif (<span class="math-font font-bold">a > 0</span>).<br>
+                  • Basis tidak boleh bernilai 1 (<span class="math-font font-bold">a ≠ 1</span>) karena 1<sup>b</sup> = 1 tidak menghasilkan fungsi satu-satu.
+                </p>
+              </div>
+
+              <!-- Syarat Numerus -->
+              <div class="p-5 bg-sky-50/80 border border-sky-200 rounded-2xl space-y-2">
+                <div class="flex items-center space-x-2 text-brand-primary font-bold text-sm">
+                  <i class="fa-solid fa-circle-check"></i>
+                  <span>Syarat 2: Numerus (c)</span>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-sky-200 text-xs font-mono font-bold text-sky-900">
+                  c > 0  (atau f(x) > 0)
+                </div>
+                <p class="text-[11px] text-slate-600 leading-relaxed">
+                  • Numerus wajib murni bernilai positif.<br>
+                  • Logaritma dari bilangan 0 atau negatif <b>TIDAK TERDEFINISI</b> pada bilangan real.
+                </p>
+              </div>
+            </div>
+
+            <div class="p-3.5 bg-slate-900 text-white rounded-xl text-xs flex items-center justify-between">
+              <span><i class="fa-solid fa-lightbulb text-amber-400 mr-2"></i>Catatan Ujian:</span>
+              <span class="text-slate-300">Setiap nilai x penyelesaian wajib diuji ke syarat numerus f(x) > 0.</span>
+            </div>
+          </div>
+        `
+      },
+
+      // Slide 4: 10 Sifat Logaritma (Halaman 4)
+      {
+        id: "properties", 
+        title: "3. 10 Sifat Sempurna Logaritma", 
+        category: "Sifat-Sifat SMA", 
+        icon: "fa-solid fa-layer-group",
+        html: `
+          <div class="space-y-3">
+            <div>
+              <span class="text-xs font-bold uppercase text-brand-primary bg-sky-50 px-3 py-1 rounded-md">Langkah 3 • Alat Operasi</span>
+              <h2 class="font-fredoka text-2xl text-slate-800 font-bold mt-1">10 Sifat Utama Logaritma SMA</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[340px] overflow-y-auto pr-1">
+              <div class="bg-white border p-3 rounded-xl text-center hover:border-brand-primary transition-all">
+                <span class="text-[9px] bg-sky-50 text-brand-primary px-2 py-0.5 rounded font-bold">1. Penjumlahan</span>
+                <div class="font-mono text-xs font-bold text-slate-800 mt-1.5"><sup>a</sup>log b + <sup>a</sup>log c = <sup>a</sup>log(b · c)</div>
+              </div>
+              <div class="bg-white border p-3 rounded-xl text-center hover:border-brand-primary transition-all">
+                <span class="text-[9px] bg-sky-50 text-brand-primary px-2 py-0.5 rounded font-bold">2. Pengurangan</span>
+                <div class="font-mono text-xs font-bold text-slate-800 mt-1.5"><sup>a</sup>log b - <sup>a</sup>log c = <sup>a</sup>log(b / c)</div>
+              </div>
+              <div class="bg-white border p-3 rounded-xl text-center hover:border-brand-primary transition-all">
+                <span class="text-[9px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded font-bold">3. Pangkat Numerus</span>
+                <div class="font-mono text-xs font-bold text-slate-800 mt-1.5"><sup>a</sup>log (b<sup>n</sup>) = n · <sup>a</sup>log b</div>
+              </div>
+              <div class="bg-white border p-3 rounded-xl text-center hover:border-brand-primary transition-all">
+                <span class="text-[9px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded font-bold">4. Pangkat Basis & Numerus</span>
+                <div class="font-mono text-xs font-bold text-slate-800 mt-1.5"><sup>a<sup>m</sup></sup>log (b<sup>n</sup>) = (n/m) · <sup>a</sup>log b</div>
+              </div>
+              <div class="bg-white border p-3 rounded-xl text-center hover:border-brand-primary transition-all">
+                <span class="text-[9px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded font-bold">5. Perkalian Berantai</span>
+                <div class="font-mono text-xs font-bold text-slate-800 mt-1.5"><sup>a</sup>log b · <sup>b</sup>log c = <sup>a</sup>log c</div>
+              </div>
+              <div class="bg-white border p-3 rounded-xl text-center hover:border-brand-primary transition-all">
+                <span class="text-[9px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded font-bold">6. Ubah Basis Bebas</span>
+                <div class="font-mono text-xs font-bold text-slate-800 mt-1.5"><sup>a</sup>log b = <sup>p</sup>log b / <sup>p</sup>log a</div>
+              </div>
+              <div class="bg-white border p-3 rounded-xl text-center hover:border-brand-primary transition-all">
+                <span class="text-[9px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded font-bold">7. Balik Basis-Numerus</span>
+                <div class="font-mono text-xs font-bold text-slate-800 mt-1.5"><sup>a</sup>log b = 1 / (<sup>b</sup>log a)</div>
+              </div>
+              <div class="bg-white border p-3 rounded-xl text-center hover:border-brand-primary transition-all">
+                <span class="text-[9px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded font-bold">8. Eksponen Pangkat Log</span>
+                <div class="font-mono text-xs font-bold text-slate-800 mt-1.5">a<sup><sup>a</sup>log b</sup> = b</div>
+              </div>
+              <div class="bg-white border p-3 rounded-xl text-center hover:border-brand-primary transition-all sm:col-span-2 lg:col-span-1">
+                <span class="text-[9px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded font-bold">9 & 10. Nilai Khusus</span>
+                <div class="font-mono text-xs font-bold text-slate-800 mt-1.5"><sup>a</sup>log a = 1  dan  <sup>a</sup>log 1 = 0</div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // Slide 5: Lab Interaktif (Halaman 5 - Puncak Modul)
+      {
+        id: "lab", 
+        title: "4. Lab Simulator Eksponen & Logaritma", 
+        category: "Eksperimen Interaktif", 
+        icon: "fa-solid fa-sliders",
+        html: `
+          <div class="space-y-4">
+            <div>
+              <span class="text-xs font-bold uppercase text-brand-primary bg-sky-50 px-3 py-1 rounded-md">Langkah 4 • Eksperimen Visual</span>
+              <h2 class="font-fredoka text-2xl text-slate-800 font-bold mt-1">Simulator Hubungan a<sup>b</sup> = c ⇔ <sup>a</sup>log c = b</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+              <!-- Controls -->
+              <div class="lg:col-span-5 bg-slate-50 p-5 border rounded-2xl space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-2">Pilih Basis (a):</label>
+                  <div class="grid grid-cols-4 gap-2">
+                    <button onclick="setLabBasis(2)" id="btn-basis-2" class="py-2 text-xs font-bold font-mono rounded-xl border bg-brand-primary text-white border-brand-primary transition-all">a = 2</button>
+                    <button onclick="setLabBasis(3)" id="btn-basis-3" class="py-2 text-xs font-bold font-mono rounded-xl border bg-white text-slate-700 hover:bg-slate-100 transition-all">a = 3</button>
+                    <button onclick="setLabBasis(5)" id="btn-basis-5" class="py-2 text-xs font-bold font-mono rounded-xl border bg-white text-slate-700 hover:bg-slate-100 transition-all">a = 5</button>
+                    <button onclick="setLabBasis(10)" id="btn-basis-10" class="py-2 text-xs font-bold font-mono rounded-xl border bg-white text-slate-700 hover:bg-slate-100 transition-all">a = 10</button>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between items-center mb-1">
+                    <label class="text-xs font-bold text-slate-700">Pangkat / Hasil Log (b):</label>
+                    <span id="lab-pangkat-val" class="text-sm font-mono font-bold text-brand-primary">3</span>
+                  </div>
+                  <input type="range" id="lab-pangkat-slider" min="-2" max="5" step="1" value="3" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-500" oninput="updateLabVisualizer()">
+                  <div class="flex justify-between text-[10px] text-slate-400 font-bold mt-1">
+                    <span>-2 (Negatif)</span>
+                    <span>0</span>
+                    <span>5 (Besar)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Output Display Card -->
+              <div class="lg:col-span-7 bg-slate-900 text-white p-6 rounded-2xl shadow-xl space-y-4">
+                <span class="text-[10px] uppercase font-bold text-sky-400 tracking-wider block">Konversi Real-time:</span>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-center">
+                  <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <span class="text-[10px] text-slate-400 uppercase font-bold block mb-1">Bentuk Eksponen:</span>
+                    <div id="lab-exp-out" class="text-lg font-mono font-bold text-amber-400">2<sup>3</sup> = 8</div>
+                  </div>
+                  <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <span class="text-[10px] text-slate-400 uppercase font-bold block mb-1">Bentuk Logaritma:</span>
+                    <div id="lab-log-out" class="text-lg font-mono font-bold text-sky-400"><sup>2</sup>log 8 = 3</div>
+                  </div>
+                </div>
+
+                <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs text-slate-300 flex items-center space-x-2">
+                  <i class="fa-solid fa-circle-info text-sky-400"></i>
+                  <span id="lab-desc-out">Jika basis 2 dipangkatkan 3, maka numerusnya bernilai 8.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    function setLabBasis(b) {
+      activeLabBasis = b;
+      [2, 3, 5, 10].forEach(val => {
+        const btn = document.getElementById(`btn-basis-${val}`);
+        if (btn) {
+          if (val === b) {
+            btn.className = "py-2 text-xs font-bold font-mono rounded-xl border bg-brand-primary text-white border-brand-primary transition-all";
+          } else {
+            btn.className = "py-2 text-xs font-bold font-mono rounded-xl border bg-white text-slate-700 hover:bg-slate-100 transition-all";
+          }
+        }
+      });
+      updateLabVisualizer();
+    }
+
+    function updateLabVisualizer() {
+      const slider = document.getElementById('lab-pangkat-slider');
+      if (!slider) return;
+      const bVal = parseInt(slider.value);
+      const cVal = Math.pow(activeLabBasis, bVal);
+
+      document.getElementById('lab-pangkat-val').innerText = bVal;
+      
+      const expOut = document.getElementById('lab-exp-out');
+      const logOut = document.getElementById('lab-log-out');
+      const descOut = document.getElementById('lab-desc-out');
+
+      let displayC = Number.isInteger(cVal) ? cVal : cVal.toFixed(2);
+
+      if (expOut) expOut.innerHTML = `${activeLabBasis}<sup>${bVal}</sup> = ${displayC}`;
+      if (logOut) {
+        if (activeLabBasis === 10) {
+          logOut.innerHTML = `log ${displayC} = ${bVal}`;
+        } else {
+          logOut.innerHTML = `<sup>${activeLabBasis}</sup>log ${displayC} = ${bVal}`;
+        }
+      }
+      if (descOut) {
+        descOut.innerText = `Jika basis ${activeLabBasis} dipangkatkan ${bVal}, maka numerus yang dihasilkan adalah ${displayC}.`;
+      }
+    }
+
+    function renderSlide() {
+      const slide = slidesData[currentSlide];
+      const area = document.getElementById('slide-content-area');
+      area.innerHTML = slide.html;
+      
+      area.classList.remove('slide-enter');
+      void area.offsetWidth; 
+      area.classList.add('slide-enter');
+
+      // Update Top Progress Bar & Indicators
+      document.getElementById('progress-text').innerText = `Slide ${currentSlide + 1} dari ${slidesData.length}`;
+      document.getElementById('progress-bar-top').style.width = `${((currentSlide + 1) / slidesData.length) * 100}%`;
+      
+      // Update Button State
+      document.getElementById('prev-slide-btn').disabled = (currentSlide === 0);
+      document.getElementById('prev-slide-btn').style.opacity = (currentSlide === 0) ? '0.35' : '1';
+      
+      const isLastSlide = (currentSlide === slidesData.length - 1);
+      document.getElementById('next-btn-text').innerText = isLastSlide ? 'Selesai (Halaman 5)' : 'Selanjutnya';
+
+      updateDots();
+      renderSidebar();
+
+      if (slide.id === "lab") {
+        setTimeout(updateLabVisualizer, 50);
+      }
+    }
+
+    function updateDots() {
+      const container = document.getElementById('slide-dots');
+      container.innerHTML = '';
+      slidesData.forEach((_, idx) => {
+        const dot = document.createElement('button');
+        dot.className = `h-1.5 rounded-full transition-all duration-300 flex-shrink-0 ${
+          idx === currentSlide ? 'w-5 bg-brand-primary' : 'w-1.5 bg-slate-200 hover:bg-slate-300'
+        }`;
+        dot.onclick = () => goToSlide(idx);
+        container.appendChild(dot);
+      });
+      
+      const activeDot = container.children[currentSlide];
+      if (activeDot) {
+        activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+
+    function renderSidebar() {
+      const list = document.getElementById('sidebar-menu-list');
+      list.innerHTML = '';
+      slidesData.forEach((slide, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `w-full p-2.5 flex items-center space-x-3 rounded-xl transition-all ${
+          idx === currentSlide ? 'bg-sky-50 text-brand-primary font-bold' : 'text-slate-600 hover:bg-slate-50'
+        }`;
+        btn.innerHTML = `
+          <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0 ${
+            idx === currentSlide ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-400'
+          }">
+            <i class="${slide.icon}"></i>
+          </div>
+          <div class="text-left min-w-0 flex-1">
+            <span class="text-[9px] uppercase font-bold text-slate-400 block truncate">${slide.category}</span>
+            <p class="text-xs truncate font-fredoka mt-0.5">Hal. ${idx + 1}: ${slide.title}</p>
+          </div>
+        `;
+        btn.onclick = () => {
+          goToSlide(idx);
+          toggleSidebar(false);
+        };
+        list.appendChild(btn);
+      });
+    }
+
+    function toggleSidebar(open) {
+      const panel = document.getElementById('sidebar-panel');
+      const overlay = document.getElementById('sidebar-overlay');
+      if (open) {
+        panel.classList.remove('translate-x-full');
+        overlay.classList.remove('hidden');
+      } else {
+        panel.classList.add('translate-x-full');
+        overlay.classList.add('hidden');
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < slidesData.length - 1) {
+        currentSlide++;
+        renderSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        renderSlide();
+      }
+    }
+
+    function goToSlide(idx) {
+      currentSlide = idx;
+      renderSlide();
+    }
+
+    document.getElementById('next-slide-btn').onclick = nextSlide;
+    document.getElementById('prev-slide-btn').onclick = prevSlide;
+    document.getElementById('sidebar-btn').onclick = () => toggleSidebar(true);
+    document.getElementById('close-sidebar-btn').onclick = () => toggleSidebar(false);
+    document.getElementById('sidebar-overlay').onclick = () => toggleSidebar(false);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    window.onload = function() {
+      renderSlide();
+    };
+  </script>
+</body>
+</html>
